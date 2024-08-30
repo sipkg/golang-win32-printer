@@ -4,7 +4,7 @@
 用于在windows 系统下 进行系统打印功能
 最初想法是想为web 打印增加打印插件 以及获取系统信息,目前web打印功能太弱.
 
-# 封装win32 函数调用
+# 已封装win32 函数调用,具体参考win32 API 文档
 1. DeleteDC
 2. CreateDC
 3. TextOut
