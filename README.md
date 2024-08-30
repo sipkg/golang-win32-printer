@@ -41,7 +41,7 @@ BGRImage 封装
 
 ## 代码示例
 ``` 
-  printName := "Microsoft Print to PDF"
+        printName := "Microsoft Print to PDF"
 	dc, err := CreateDC(printName)
 	fmt.Print(err)
 	StartDCPrinter(dc, "gdiDoc")
