@@ -37,7 +37,7 @@
 
 ## 目前打印流程
 BGRImage 封装
-通过 画图函数 把图片 文字 线条 矩形 写入BGRImage 再通过 StretchDIBits 复制到打印机HDC
+通过 画图函数 把图片 文字 线条 矩形 写入临时缓冲 BGRImage 再通过 StretchDIBits 复制到打印机HDC输出
 
 ## 代码示例
 ``` 
