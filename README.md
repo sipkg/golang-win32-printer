@@ -46,7 +46,7 @@ BGRImage 封装
 	fmt.Print(err)
 	StartDCPrinter(dc, "gdiDoc")
 	StartPage(dc)
-	file, err := os.Open("C:\\Users\\wangjun\\Desktop\\USA.png")
+	file, err := os.Open("C:\\Users\\Desktop\\USA.png")
 	fmt.Print(err)
 	image, err := png.Decode(file)
 	fmt.Print(err)
