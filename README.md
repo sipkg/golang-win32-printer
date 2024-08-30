@@ -40,7 +40,7 @@ BGRImage 封装
 通过 画图函数 把图片 文字 线条 矩形 写入BGRImage 再通过 StretchDIBits 复制到打印机HDC
 
 ## 代码示例
-` 
+``` 
   printName := "Microsoft Print to PDF"
 	dc, err := CreateDC(printName)
 	fmt.Print(err)
@@ -57,5 +57,5 @@ BGRImage 封装
 	EndPage(dc)
 	EndDoc(dc)
 	DeleteDC(dc)
-`
+```
 功能正在完善中....欢迎参与改进
