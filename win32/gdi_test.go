@@ -84,7 +84,7 @@ func TestGetDeviceCaps(t *testing.T) {
 }
 
 func TestBmp(t *testing.T) {
-	file, err := os.Open("C:\\Users\\wangjun\\Desktop\\test.bmp")
+	file, err := os.Open("C:\\Users\\Desktop\\test.bmp")
 	t.Logf("%v", err)
 	bmp.Decode(file)
 }
@@ -95,7 +95,7 @@ func TestPrintPNG(t *testing.T) {
 	fmt.Print(err)
 	StartDCPrinter(dc, "gdiDoc")
 	StartPage(dc)
-	file, err := os.Open("C:\\Users\\wangjun\\Desktop\\USA.png")
+	file, err := os.Open("C:\\Users\\Desktop\\test.png")
 	fmt.Print(err)
 	image, err := png.Decode(file)
 	fmt.Print(err)
@@ -115,7 +115,7 @@ func TestPrintJPG(t *testing.T) {
 	StartDCPrinter(dc, "gdiDoc")
 	StartPage(dc)
 
-	file, err := os.Open("C:\\Users\\wangjun\\Desktop\\banner_demo2.jpg")
+	file, err := os.Open("C:\\Users\\Desktop\\test.jpg")
 	fmt.Print(err)
 	image, err := jpeg.Decode(file)
 	fmt.Print(err)
@@ -135,7 +135,7 @@ func TestPrintBMP(t *testing.T) {
 	StartDCPrinter(dc, "gdiDoc")
 	StartPage(dc)
 
-	file, err := os.Open("C:\\Users\\wangjun\\Desktop\\banner_demo2.jpg")
+	file, err := os.Open("C:\\Users\\Desktop\\test.jpg")
 	fmt.Print(err)
 	image, err := jpeg.Decode(file)
 	fmt.Print(err)
