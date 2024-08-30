@@ -31,7 +31,7 @@
 
 ## 包结构
 -  golang-win32-printer
-     - image 封装 BGR 图片像素包
+     - image 封装 BGR 格式图像,支持24位BPP
      - printer win32 api 逻辑封装
      - win32 系统调用API封装 
 
