@@ -1,15 +1,11 @@
 # golang-win32-printer
 
-Use golang language to encapsulate win32 print API to support printing
-pictures, strings, and files
+Use Go language to encapsulate win32 print API to support printing
+pictures, strings, and files.
 
-# Objective
+# win32 function encapsulated
 
-Used for system printing in Windows. The original idea was to add a print
-plug-in for web printing and obtain system information. Currently, the web
-printing function is too weak.
-
-# The win32 function call has been encapsulated, please refer to the win32 API document for details
+Please refer to the win32 API document for details.
 
 1. DeleteDC
 2. CreateDC
@@ -40,7 +36,7 @@ printing function is too weak.
 - golang-win32-printer
   - image: BGR format image wrapper, supports 24-bit BPP
   - printer: win32 API logic wrapper
-  - win32: system call API encapsulation
+  - win32: system call API encapsulation (inclugind gdi32)
 
 ## Current Printing Flow
 
