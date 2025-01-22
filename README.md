@@ -1,10 +1,16 @@
 # golang-win32-printer
-使用golang 语言封装win32 print API 支持打印图片,字符串，文件
-# 开发目的
-用于在windows 系统下 进行系统打印功能
-最初想法是想为web 打印增加打印插件 以及获取系统信息,目前web打印功能太弱.
 
-# 已封装win32 函数调用,具体参考win32 API 文档
+Use golang language to encapsulate win32 print API to support printing
+pictures, strings, and files
+
+# Objective
+
+Used for system printing in Windows. The original idea was to add a print
+plug-in for web printing and obtain system information. Currently, the web
+printing function is too weak.
+
+# The win32 function call has been encapsulated, please refer to the win32 API document for details
+
 1. DeleteDC
 2. CreateDC
 3. TextOut
@@ -29,33 +35,44 @@
 22. GetDefaultPrinter
 23. SetDefaultPrinter
 
-## 包结构
--  golang-win32-printer
-     - image 封装 BGR 格式图像,支持24位BPP
-     - printer win32 api 逻辑封装
-     - win32 系统调用API封装 
+## Package Structure
 
-## 目前打印流程
-BGRImage 封装
-通过 画图函数 把图片 文字 线条 矩形 写入临时缓冲 BGRImage 再通过 StretchDIBits 复制到打印机HDC输出
+- golang-win32-printer
+  - image: BGR format image wrapper, supports 24-bit BPP
+  - printer: win32 API logic wrapper
+  - win32: system call API encapsulation
 
-## 代码示例
-``` 
-        printName := "Microsoft Print to PDF"
-	dc, err := CreateDC(printName)
-	fmt.Print(err)
-	StartDCPrinter(dc, "gdiDoc")
-	StartPage(dc)
-	file, err := os.Open("C:\\Users\\Desktop\\USA.png")
-	fmt.Print(err)
-	image, err := png.Decode(file)
-	fmt.Print(err)
-	bgr := bgr2.NewBGRImage(image.Bounds())
-	draw.Draw(bgr, image.Bounds(), image, image2.Point{0, 0}, draw.Src)
-	src := bgr2.ReverseDIB(bgr.Pix, image.Bounds().Dx(), image.Bounds().Dy(), 24)
-	DrawDIImage(dc, 0, uint32(image.Bounds().Dy())*10, uint32(image.Bounds().Dx())*10, uint32(image.Bounds().Dy())*10, 0, 0, int32(image.Bounds().Dx()), int32(image.Bounds().Dy()), src)
-	EndPage(dc)
-	EndDoc(dc)
-	DeleteDC(dc)
+## Current Printing Flow
+
+BGRImage encapsulation handles drawing functions to write images, text, lines,
+and rectangles into a temporary BGRImage buffer, then copies to printer HDC
+output via StretchDIBits
+
+## Code Example
+
+```go
+printName := "Microsoft Print to PDF"
+dc, err := CreateDC(printName)
+fmt.Print(err)
+StartDCPrinter(dc, "gdiDoc")
+StartPage(dc)
+
+file, err := os.Open("C:\\Users\\Desktop\\USA.png")
+fmt.Print(err)
+image, err := png.Decode(file)
+fmt.Print(err)
+
+bgr := bgr2.NewBGRImage(image.Bounds())
+draw.Draw(bgr, image.Bounds(), image, image2.Point{0, 0}, draw.Src)
+src := bgr2.ReverseDIB(bgr.Pix, image.Bounds().Dx(), image.Bounds().Dy(), 24)
+
+DrawDIImage(dc, 0, uint32(image.Bounds().Dy())*10, 
+    uint32(image.Bounds().Dx())*10, uint32(image.Bounds().Dy())*10,
+    0, 0, int32(image.Bounds().Dx()), int32(image.Bounds().Dy()), src)
+
+EndPage(dc)
+EndDoc(dc)
+DeleteDC(dc)
 ```
-功能正在完善中....欢迎参与改进
+
+Features under development. Contributors welcome.
