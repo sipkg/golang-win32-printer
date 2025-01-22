@@ -1,10 +1,11 @@
 package win32
 
 import (
-	"golang.org/x/sys/windows"
 	"image"
 	"syscall"
 	"unsafe"
+
+	"golang.org/x/sys/windows"
 )
 
 var (
@@ -25,6 +26,16 @@ var (
 	procEndDoc        = gdi32.NewProc("EndDoc")
 	procEndPage       = gdi32.NewProc("EndPage")
 	procStretchDIBits = gdi32.NewProc("StretchDIBits")
+
+	procSetTextColor = gdi32.NewProc("SetTextColor")
+
+	procGetStockObject = gdi32.NewProc("GetStockObject")
+
+	procGetCurrentObject   = gdi32.NewProc("GetCurrentObject")
+	procGetObject          = gdi32.NewProc("GetObjectW")
+	procSelectObject       = gdi32.NewProc("SelectObject")
+	procDeleteObject       = gdi32.NewProc("DeleteObject")
+	procCreateFontIndirect = gdi32.NewProc("CreateFontIndirectW")
 )
 
 type HDC syscall.Handle

@@ -50,29 +50,6 @@ output via StretchDIBits
 
 ## Code Example
 
-```go
-printName := "Microsoft Print to PDF"
-dc, err := CreateDC(printName)
-fmt.Print(err)
-StartDCPrinter(dc, "gdiDoc")
-StartPage(dc)
-
-file, err := os.Open("C:\\Users\\Desktop\\USA.png")
-fmt.Print(err)
-image, err := png.Decode(file)
-fmt.Print(err)
-
-bgr := bgr2.NewBGRImage(image.Bounds())
-draw.Draw(bgr, image.Bounds(), image, image2.Point{0, 0}, draw.Src)
-src := bgr2.ReverseDIB(bgr.Pix, image.Bounds().Dx(), image.Bounds().Dy(), 24)
-
-DrawDIImage(dc, 0, uint32(image.Bounds().Dy())*10, 
-    uint32(image.Bounds().Dx())*10, uint32(image.Bounds().Dy())*10,
-    0, 0, int32(image.Bounds().Dx()), int32(image.Bounds().Dy()), src)
-
-EndPage(dc)
-EndDoc(dc)
-DeleteDC(dc)
-```
+See examples folder.
 
 Features under development. Contributors welcome.
