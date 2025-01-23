@@ -58,6 +58,7 @@ func main() {
 		log.Fatalf("StartPage failed: %s", err)
 	}
 
+	win32.SetFont(dc, win32.TimesNewRoman)
 	width, err := win32.GetDeviceCaps(dc, win32.HORZRES)
 	if err != nil {
 		log.Fatalf("Retreiving page width failed: %s", err)
