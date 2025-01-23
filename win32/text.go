@@ -87,6 +87,106 @@ func SetTextSize(hdc HDC, size int32) error {
 
 	// Update height (negative value for character height)
 	lf.Height = -size
+	// Update width proportionally (adjust the factor if needed)
+	lf.Width = size / 2
+
+	// Create new font
+	newFont, _, err := syscall.SyscallN(procCreateFontIndirect.Addr(), uintptr(unsafe.Pointer(&lf)))
+	if newFont == 0 {
+		return err
+	}
+
+	// Select new font into DC
+	oldFont, _, err := syscall.SyscallN(procSelectObject.Addr(),
+		uintptr(hdc),
+		newFont,
+	)
+	if oldFont == 0 {
+		syscall.SyscallN(procDeleteObject.Addr(), newFont)
+		return err
+	}
+
+	// Delete old font if it exists
+	if font != 0 {
+		syscall.SyscallN(procDeleteObject.Addr(), font)
+	}
+
+	return nil
+}
+
+func SetBoldFont(hdc HDC, bold bool) error {
+	// Get current font
+	var lf LOGFONT
+	font, _, err := syscall.SyscallN(procGetCurrentObject.Addr(), uintptr(hdc), uintptr(OBJ_FONT))
+	if font == 0 {
+		return err
+	}
+
+	// Get font information
+	ret, _, err := syscall.SyscallN(procGetObject.Addr(),
+		font,
+		uintptr(unsafe.Sizeof(lf)),
+		uintptr(unsafe.Pointer(&lf)),
+	)
+	if ret == 0 {
+		return err
+	}
+
+	// Update weight to bold
+	if bold {
+		lf.Weight = 700 // FW_BOLD
+	} else {
+		lf.Weight = 400 //FW_NORMAL
+	}
+
+	// Create new font
+	newFont, _, err := syscall.SyscallN(procCreateFontIndirect.Addr(), uintptr(unsafe.Pointer(&lf)))
+	if newFont == 0 {
+		return err
+	}
+
+	// Select new font into DC
+	oldFont, _, err := syscall.SyscallN(procSelectObject.Addr(),
+		uintptr(hdc),
+		newFont,
+	)
+	if oldFont == 0 {
+		syscall.SyscallN(procDeleteObject.Addr(), newFont)
+		return err
+	}
+
+	// Delete old font if it exists
+	if font != 0 {
+		syscall.SyscallN(procDeleteObject.Addr(), font)
+	}
+
+	return nil
+}
+
+func SetItalicFont(hdc HDC, italic bool) error {
+	// Get current font
+	var lf LOGFONT
+	font, _, err := syscall.SyscallN(procGetCurrentObject.Addr(), uintptr(hdc), uintptr(OBJ_FONT))
+	if font == 0 {
+		return err
+	}
+
+	// Get font information
+	ret, _, err := syscall.SyscallN(procGetObject.Addr(),
+		font,
+		uintptr(unsafe.Sizeof(lf)),
+		uintptr(unsafe.Pointer(&lf)),
+	)
+	if ret == 0 {
+		return err
+	}
+
+	// Update italic property
+	if italic {
+		lf.Italic = 1
+	} else {
+		lf.Italic = 0
+	}
 
 	// Create new font
 	newFont, _, err := syscall.SyscallN(procCreateFontIndirect.Addr(), uintptr(unsafe.Pointer(&lf)))

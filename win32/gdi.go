@@ -36,6 +36,8 @@ var (
 	procSelectObject       = gdi32.NewProc("SelectObject")
 	procDeleteObject       = gdi32.NewProc("DeleteObject")
 	procCreateFontIndirect = gdi32.NewProc("CreateFontIndirectW")
+
+	procGetTextExtentPoint32W = gdi32.NewProc("GetTextExtentPoint32W")
 )
 
 type HDC syscall.Handle
@@ -388,4 +390,25 @@ func LineTo(dc HDC, x, y uint32) (err error) {
 		}
 	}
 	return err
+}
+
+func GetTextExtentPoint32(hdc syscall.Handle, text string) (uint32, uint32, error) {
+	var size struct {
+		cx int32
+		cy int32
+	}
+	ptr, err := syscall.UTF16PtrFromString(text)
+	if err != nil {
+		return 0, 0, err
+	}
+	ret, _, err := procGetTextExtentPoint32W.Call(
+		uintptr(hdc),
+		uintptr(unsafe.Pointer(ptr)),
+		uintptr(len(text)),
+		uintptr(unsafe.Pointer(&size)),
+	)
+	if ret == 0 {
+		return 0, 0, err
+	}
+	return uint32(size.cx), uint32(size.cy), nil
 }
