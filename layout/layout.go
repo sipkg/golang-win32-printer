@@ -71,9 +71,11 @@ func truncateString(str string, maxLength int) string {
 	return str
 }
 
-func formatArticles(ticket Ticket) [][]string {
+func formatArticles(ticket Ticket) ([][]string, int) {
 	var formattedArticles [][]string
+	var totalArticles = 0
 	for _, article := range ticket.Articles {
+		totalArticles += article.Quantite
 		formattedArticle := []string{
 			fmt.Sprintf("%-40s", truncateString(fmt.Sprintf("%d x %s", article.Quantite, article.Nom), 40)),        // Première colonne, largeur fixe de 40 caractères
 			fmt.Sprintf("%-15s", truncateString(fmt.Sprintf("à %.2f €", article.Prix), 15)),                        // Deuxième colonne, largeur fixe de 10 caractères
@@ -81,11 +83,29 @@ func formatArticles(ticket Ticket) [][]string {
 		}
 		formattedArticles = append(formattedArticles, formattedArticle)
 	}
-	return formattedArticles
+	return formattedArticles, totalArticles
 }
 
-func DrawArticlesTab(dc win32.HDC, pageWidth, margin, startY uint32, ticket Ticket) {
-	formattedArticles := formatArticles(ticket)
+func DrawSeparator(dc win32.HDC, pageWidth, startY uint32) uint32 {
+	// Dessiner la ligne de séparation
+	separator := "--------------------------------------------------------"
+	textWidth, textHeight, err := win32.GetTextExtentPoint32(syscall.Handle(dc), separator)
+	if err != nil {
+		log.Printf("Get text dimensions failed: %s", err)
+	}
+	x := CenterElement(pageWidth, textWidth)
+	err = win32.TextOut(dc, x, startY, separator, uint32(len(separator)))
+	if err != nil {
+		log.Printf("TextOut failed: %s", err)
+	}
+
+	startY += textHeight
+
+	return startY + 100
+}
+
+func DrawArticlesTab(dc win32.HDC, pageWidth, margin, startY uint32, ticket Ticket) (uint32, int, float64) {
+	formattedArticles, totalArticles := formatArticles(ticket)
 
 	for _, article := range formattedArticles {
 		// Dessine la première colonne
@@ -99,7 +119,7 @@ func DrawArticlesTab(dc win32.HDC, pageWidth, margin, startY uint32, ticket Tick
 		// Dessine la deuxième colonne
 		text = article[1]
 		x = AlignLeftFrom(4 * pageWidth / 7)
-		err = win32.TextOut(dc, x, uint32(startY), text, uint32(len(text)))
+		err = win32.TextOut(dc, x, startY, text, uint32(len(text)))
 		if err != nil {
 			log.Printf("TextOut failed: %s", err)
 		}
@@ -112,13 +132,17 @@ func DrawArticlesTab(dc win32.HDC, pageWidth, margin, startY uint32, ticket Tick
 			continue
 		}
 		x = AlignRight(pageWidth, textWidth)
-		err = win32.TextOut(dc, x, uint32(startY), text, uint32(len(text)))
+		err = win32.TextOut(dc, x, startY, text, uint32(len(text)))
 		if err != nil {
 			log.Printf("TextOut failed: %s", err)
 		}
 
 		startY += textHeight + 20 // Incrémente la position verticale pour le prochain article
 	}
+
+	startY = DrawSeparator(dc, pageWidth, startY)
+
+	return startY, totalArticles, ticket.Total
 }
 
 func DrawHeader(dc win32.HDC, pageWidth, margin, startY uint32, pdv Pdv) uint32 {
@@ -156,9 +180,9 @@ func DrawHeader(dc win32.HDC, pageWidth, margin, startY uint32, pdv Pdv) uint32 
 		if err != nil {
 			log.Printf("TextOut failed: %s", err)
 		}
-		startY += textHeight + 15
+		startY += textHeight + 20
 	}
-	startY += 15
+	startY += 20
 
 	timestamp := time.Now().Format("02/01/2006 15:04:05")
 	textWidth, textHeight, err = win32.GetTextExtentPoint32(syscall.Handle(dc), timestamp)
@@ -173,18 +197,65 @@ func DrawHeader(dc win32.HDC, pageWidth, margin, startY uint32, pdv Pdv) uint32 
 	}
 	startY += textHeight + 30
 
-	// Dessiner la ligne de séparation
-	separator := "------------------------------------------------"
-	textWidth, textHeight, err = win32.GetTextExtentPoint32(syscall.Handle(dc), separator)
+	startY = DrawSeparator(dc, pageWidth, startY)
+
+	return startY
+}
+
+func DrawFooter(dc win32.HDC, pageWidth, margin, startY uint32, totalArticles int, total float64) {
+	totalLine := []string{
+		"Total à payer:",
+		fmt.Sprintf("%10s", fmt.Sprintf("%2.f €", total)),
+	}
+
+	// Calcule la hauteur du texte avant de la passer en gras
+	_, originalTextHeight, err := win32.GetTextExtentPoint32(syscall.Handle(dc), totalLine[0])
 	if err != nil {
 		log.Printf("Get text dimensions failed: %s", err)
 	}
-	x = CenterElement(pageWidth, textWidth)
-	err = win32.TextOut(dc, x, startY, separator, uint32(len(separator)))
+
+	win32.SetBoldFont(dc, true)
+
+	textWidth, textHeight, err := win32.GetTextExtentPoint32(syscall.Handle(dc), totalLine[0])
+	if err != nil {
+		log.Printf("Get text dimensions failed: %s", err)
+	}
+	fmt.Println(originalTextHeight)
+	win32.SetTextSize(dc, int32(6*textHeight/5))
+	x := CenterElement(pageWidth/2, textWidth)
+	err = win32.TextOut(dc, x, startY, totalLine[0], uint32(len(totalLine[0])))
 	if err != nil {
 		log.Printf("TextOut failed: %s", err)
 	}
-	startY += textHeight + 50
 
-	return startY
+	textWidth, textHeight, err = win32.GetTextExtentPoint32(syscall.Handle(dc), totalLine[1])
+	if err != nil {
+		log.Printf("Get text dimensions failed: %s", err)
+	}
+	x = AlignRight(pageWidth, textWidth)
+	err = win32.TextOut(dc, x, startY, totalLine[1], uint32(len(totalLine[1])))
+	if err != nil {
+		log.Printf("TextOut failed: %s", err)
+	}
+	fmt.Println(textHeight)
+
+	startY += textHeight + 100
+
+	fmt.Println(originalTextHeight)
+	win32.SetBoldFont(dc, false)
+	win32.SetTextSize(dc, int32(originalTextHeight-10))
+
+	startY = DrawSeparator(dc, pageWidth, startY)
+
+	text := "Nous vous remercions de votre visite !"
+	textWidth, textHeight, err = win32.GetTextExtentPoint32(syscall.Handle(dc), text)
+	if err != nil {
+		log.Printf("Get text dimensions failed: %s", err)
+	}
+	fmt.Println(textHeight)
+	x = CenterElement(pageWidth, textWidth)
+	err = win32.TextOut(dc, x, startY, text, uint32(len(text)))
+	if err != nil {
+		log.Printf("TextOut failed: %s", err)
+	}
 }

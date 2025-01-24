@@ -392,6 +392,7 @@ func LineTo(dc HDC, x, y uint32) (err error) {
 	return err
 }
 
+// Calcule la largeur et la hauteur de la chaîne passée en paramètre
 func GetTextExtentPoint32(hdc syscall.Handle, text string) (uint32, uint32, error) {
 	var size struct {
 		cx int32
