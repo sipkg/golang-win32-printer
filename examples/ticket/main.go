@@ -7,14 +7,8 @@
 package main
 
 import (
-	"image"
-	"image/draw"
-	"image/png"
 	"log"
-	"os"
-	"syscall"
 
-	"print/image/bgr"
 	"print/layout"
 	"print/win32"
 )
@@ -25,9 +19,12 @@ var ticket = layout.Ticket{
 		{Nom: "Article 1", Quantite: 2, Prix: 150.0},
 		{Nom: "Article 2", Quantite: 1, Prix: 5.0},
 		{Nom: "Article 3", Quantite: 3, Prix: 1.0},
+		{Nom: "Article 4", Quantite: 2, Prix: 2.0},
+		{Nom: "Article 5", Quantite: 2, Prix: 3.0},
+		{Nom: "Article 6", Quantite: 4, Prix: 5.0},
 		{Nom: "Article avec un nom vraiment très long histoire de voir ce que ça fait", Quantite: 1, Prix: 2.0},
 	},
-	Total: 310.0,
+	Total: 338,
 }
 
 var pdv = layout.Pdv{
@@ -40,7 +37,7 @@ var pdv = layout.Pdv{
 
 const (
 	textHeight = 128
-	margin     = 150
+	margin     = 350
 )
 
 func main() {
@@ -64,36 +61,12 @@ func main() {
 	if err != nil {
 		log.Fatalf("Retreiving page width failed: %s", err)
 	}
-	height, err := win32.GetDeviceCaps(dc, win32.VERTRES)
+	_, err = win32.GetDeviceCaps(dc, win32.VERTRES)
 	if err != nil {
 		log.Fatalf("Retreiving page height failed: %s", err)
 	}
-	log.Printf("Page dimensions: %d x %d pixels", width, height)
 
-	// Load an image and convert it to be printable
-	file, err := os.Open("demo.png")
-	if err != nil {
-		log.Fatalf("Could not load image: %s", err)
-	}
-	img, err := png.Decode(file)
-	if err != nil {
-		log.Fatalf("Could not decode image: %s", err)
-	}
-
-	imgWidth := uint32(img.Bounds().Dx()) * 5
-	imgHeight := uint32(img.Bounds().Dy()) * 5
-	imgX := layout.CenterElement(uint32(width), imgWidth)
-	imgY := layout.CenterElement(uint32(height), imgHeight)
-
-	imgbgr := bgr.NewBGRImage(img.Bounds())
-	draw.Draw(imgbgr, img.Bounds(), img, image.Point{0, 0}, draw.Src)
-	src := bgr.ReverseDIB(imgbgr.Pix, img.Bounds().Dx(), img.Bounds().Dy(), 24)
-	err = win32.DrawDIImage(dc, imgX, imgY, imgWidth, imgHeight, 0, 0, int32(img.Bounds().Dx()), int32(img.Bounds().Dy()), src)
-	if err != nil {
-		log.Printf("DrawDIImage failed: %s", err)
-	}
-
-	oldcol, err := win32.SetTextColor(dc, win32.RGB(200, 20, 80))
+	oldcol, err := win32.SetTextColor(dc, win32.RGB(0, 0, 0))
 	if err != nil {
 		log.Printf("SetTextColor failed: %s", err)
 	}
@@ -104,17 +77,11 @@ func main() {
 		log.Printf("SetTextSize failed: %s", err)
 	}
 
-	text := "Hello world"
-	textWidth, _, err := win32.GetTextExtentPoint32(syscall.Handle(dc), text)
-	if err != nil {
-		log.Printf("Get text dimensions failed: %s", err)
-	}
-	x := layout.CenterElement(width, textWidth)
-	startY := uint32(10)
-	err = win32.TextOut(dc, x, startY, text, uint32(len(text)))
-	if err != nil {
-		log.Printf("TextOut failed: %s", err)
-	}
+	headerStopsY := layout.DrawHeader(dc, width, margin, pdv)
+
+	tabStopsY, totalArticles, aPayer := layout.DrawArticlesTab(dc, width, margin, headerStopsY, ticket)
+
+	layout.DrawFooter(dc, width, margin, tabStopsY, totalArticles, aPayer)
 
 	err = win32.EndPage(dc)
 	if err != nil {
