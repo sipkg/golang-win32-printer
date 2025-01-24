@@ -75,12 +75,12 @@ func SetTextColor(hdc HDC, color COLORREF) (COLORREF, error) {
 //
 // Returns:
 //   - error: nil if successful, error object otherwise
-func SetTextSize(hdc HDC, size int32) error {
+func SetTextSize(hdc HDC, size int32) (int32, error) {
 	// Get current font
 	var lf LOGFONT
 	font, _, err := syscall.SyscallN(procGetCurrentObject.Addr(), uintptr(hdc), uintptr(OBJ_FONT))
 	if font == 0 {
-		return err
+		return 0, err
 	}
 
 	// Get font information
@@ -90,8 +90,10 @@ func SetTextSize(hdc HDC, size int32) error {
 		uintptr(unsafe.Pointer(&lf)),
 	)
 	if ret == 0 {
-		return err
+		return 0, err
 	}
+
+	originalHeight := lf.Height
 
 	// Update height (negative value for character height)
 	lf.Height = -size
@@ -101,7 +103,7 @@ func SetTextSize(hdc HDC, size int32) error {
 	// Create new font
 	newFont, _, err := syscall.SyscallN(procCreateFontIndirect.Addr(), uintptr(unsafe.Pointer(&lf)))
 	if newFont == 0 {
-		return err
+		return 0, err
 	}
 
 	// Select new font into DC
@@ -111,7 +113,7 @@ func SetTextSize(hdc HDC, size int32) error {
 	)
 	if oldFont == 0 {
 		syscall.SyscallN(procDeleteObject.Addr(), newFont)
-		return err
+		return 0, err
 	}
 
 	// Delete old font if it exists
@@ -119,7 +121,7 @@ func SetTextSize(hdc HDC, size int32) error {
 		syscall.SyscallN(procDeleteObject.Addr(), font)
 	}
 
-	return nil
+	return -originalHeight, nil
 }
 
 func SetBoldFont(hdc HDC, bold bool) error {
