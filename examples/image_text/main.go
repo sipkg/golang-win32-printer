@@ -19,25 +19,6 @@ import (
 	"print/win32"
 )
 
-var ticket = layout.Ticket{
-	PdvID: 1,
-	Articles: []layout.Article{
-		{Nom: "Article 1", Quantite: 2, Prix: 150.0},
-		{Nom: "Article 2", Quantite: 1, Prix: 5.0},
-		{Nom: "Article 3", Quantite: 3, Prix: 1.0},
-		{Nom: "Article avec un nom vraiment très long histoire de voir ce que ça fait", Quantite: 1, Prix: 2.0},
-	},
-	Total: 310.0,
-}
-
-var pdv = layout.Pdv{
-	ID:      1,
-	Nom:     "Mon Magasin",
-	Adresse: "123 Rue Exemple, 75000 Paris",
-	Tel:     "01 23 45 67 89",
-	Mail:    "contact@monmagasin.fr",
-}
-
 const (
 	textHeight = 128
 	margin     = 150

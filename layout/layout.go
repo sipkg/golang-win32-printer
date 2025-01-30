@@ -1,25 +1,5 @@
 package layout
 
-type Article struct {
-	Nom      string
-	Prix     float64
-	Quantite int
-}
-
-type Ticket struct {
-	PdvID    int
-	Articles []Article
-	Total    float64
-}
-
-type Pdv struct {
-	ID      int
-	Nom     string
-	Adresse string
-	Tel     string
-	Mail    string
-}
-
 func CenterElement(pageWidth, elementWidth uint32) uint32 {
 	return (pageWidth - elementWidth) / 2
 }
@@ -56,7 +36,7 @@ func CenterElementVerticallyFrom(startY, containerHeight, elementHeight uint32) 
 	return startY + (containerHeight-elementHeight)/2
 }
 
-func truncateString(str string, maxLength int) string {
+func TruncateString(str string, maxLength int) string {
 	if len(str) > maxLength {
 		return str[:maxLength-1] + "."
 	}

@@ -9,13 +9,13 @@ package main
 import (
 	"log"
 
-	"print/layout"
+	"print/ticket"
 	"print/win32"
 )
 
-var ticket = layout.Ticket{
+var t = ticket.Ticket{
 	PdvID: 1,
-	Articles: []layout.Article{
+	Articles: []ticket.Article{
 		{Nom: "Article 1", Quantite: 2, Prix: 150.0},
 		{Nom: "Article 2", Quantite: 1, Prix: 5.0},
 		{Nom: "Article 3", Quantite: 3, Prix: 1.0},
@@ -27,7 +27,7 @@ var ticket = layout.Ticket{
 	Total: 338,
 }
 
-var pdv = layout.Pdv{
+var pdv = ticket.Pdv{
 	ID:      1,
 	Nom:     "Mon Magasin",
 	Adresse: "123 Rue Exemple, 75000 Paris",
@@ -77,11 +77,11 @@ func main() {
 		log.Printf("SetTextSize failed: %s", err)
 	}
 
-	headerStopsY := layout.DrawHeader(dc, width, margin, pdv)
+	headerStopsY := ticket.DrawHeader(dc, width, margin, pdv)
 
-	tabStopsY, totalArticles, aPayer := layout.DrawArticlesTab(dc, width, margin, headerStopsY, ticket)
+	tabStopsY, totalArticles, aPayer := ticket.DrawArticlesTab(dc, width, margin, headerStopsY, t)
 
-	layout.DrawFooter(dc, width, margin, tabStopsY, totalArticles, aPayer)
+	ticket.DrawFooter(dc, width, margin, tabStopsY, totalArticles, aPayer)
 
 	err = win32.EndPage(dc)
 	if err != nil {

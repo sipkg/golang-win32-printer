@@ -1,12 +1,33 @@
-package layout
+package ticket
 
 import (
 	"fmt"
 	"log"
+	"print/layout"
 	"print/win32"
 	"syscall"
 	"time"
 )
+
+type Article struct {
+	Nom      string
+	Prix     float64
+	Quantite int
+}
+
+type Ticket struct {
+	PdvID    int
+	Articles []Article
+	Total    float64
+}
+
+type Pdv struct {
+	ID      int
+	Nom     string
+	Adresse string
+	Tel     string
+	Mail    string
+}
 
 func formatArticles(ticket Ticket) ([][]string, int) {
 	var formattedArticles [][]string
@@ -14,9 +35,9 @@ func formatArticles(ticket Ticket) ([][]string, int) {
 	for _, article := range ticket.Articles {
 		totalArticles += article.Quantite
 		formattedArticle := []string{
-			fmt.Sprintf("%-35s", truncateString(fmt.Sprintf("%d x %s", article.Quantite, article.Nom), 35)),        // Première colonne, largeur fixe de 35 caractères
-			fmt.Sprintf("%-15s", truncateString(fmt.Sprintf("à %.2f €", article.Prix), 15)),                        // Deuxième colonne, largeur fixe de 15 caractères
-			fmt.Sprintf("%10s", truncateString(fmt.Sprintf("%.2f €", article.Prix*float64(article.Quantite)), 10)), // Troisième colonne, largeur fixe de 10 caractères
+			fmt.Sprintf("%-35s", layout.TruncateString(fmt.Sprintf("%d x %s", article.Quantite, article.Nom), 35)),        // Première colonne, largeur fixe de 35 caractères
+			fmt.Sprintf("%-15s", layout.TruncateString(fmt.Sprintf("à %.2f €", article.Prix), 15)),                        // Deuxième colonne, largeur fixe de 15 caractères
+			fmt.Sprintf("%10s", layout.TruncateString(fmt.Sprintf("%.2f €", article.Prix*float64(article.Quantite)), 10)), // Troisième colonne, largeur fixe de 10 caractères
 		}
 		formattedArticles = append(formattedArticles, formattedArticle)
 	}
@@ -30,7 +51,7 @@ func DrawSeparator(dc win32.HDC, pageWidth, startY uint32) uint32 {
 	if err != nil {
 		log.Printf("Get text dimensions failed: %s", err)
 	}
-	x := CenterElement(pageWidth, textWidth)
+	x := layout.CenterElement(pageWidth, textWidth)
 	err = win32.TextOut(dc, x, startY, separator, uint32(len(separator)))
 	if err != nil {
 		log.Printf("TextOut failed: %s", err)
@@ -47,7 +68,7 @@ func DrawArticlesTab(dc win32.HDC, pageWidth, margin, startY uint32, ticket Tick
 	for _, article := range formattedArticles {
 		// Dessine la première colonne
 		text := article[0]
-		x := AlignLeft() + margin
+		x := layout.AlignLeft() + margin
 		err := win32.TextOut(dc, x, startY, text, uint32(len(text)))
 		if err != nil {
 			log.Printf("TextOut failed: %s", err)
@@ -55,7 +76,7 @@ func DrawArticlesTab(dc win32.HDC, pageWidth, margin, startY uint32, ticket Tick
 
 		// Dessine la deuxième colonne
 		text = article[1]
-		x = AlignLeftFrom(4 * pageWidth / 7)
+		x = layout.AlignLeftFrom(4 * pageWidth / 7)
 		err = win32.TextOut(dc, x, startY, text, uint32(len(text)))
 		if err != nil {
 			log.Printf("TextOut failed: %s", err)
@@ -68,7 +89,7 @@ func DrawArticlesTab(dc win32.HDC, pageWidth, margin, startY uint32, ticket Tick
 			log.Printf("Get text dimensions failed: %s", err)
 			continue
 		}
-		x = AlignRight(pageWidth-margin, textWidth)
+		x = layout.AlignRight(pageWidth-margin, textWidth)
 		err = win32.TextOut(dc, x, startY, text, uint32(len(text)))
 		if err != nil {
 			log.Printf("TextOut failed: %s", err)
@@ -95,7 +116,7 @@ func DrawHeader(dc win32.HDC, pageWidth, startY uint32, pdv Pdv) uint32 {
 	if err != nil {
 		log.Printf("SetTextSize failed: %s", err)
 	}
-	x := CenterElement(pageWidth, 5*textWidth/3)
+	x := layout.CenterElement(pageWidth, 5*textWidth/3)
 	err = win32.TextOut(dc, x, startY, text, uint32(len(text)))
 	if err != nil {
 		log.Printf("TextOut failed: %s", err)
@@ -121,7 +142,7 @@ func DrawHeader(dc win32.HDC, pageWidth, startY uint32, pdv Pdv) uint32 {
 		if err != nil {
 			log.Printf("Get text dimensions failed: %s", err)
 		}
-		x = CenterElement(pageWidth, textWidth)
+		x = layout.CenterElement(pageWidth, textWidth)
 		err = win32.TextOut(dc, x, startY, info, uint32(len(info)))
 		if err != nil {
 			log.Printf("TextOut failed: %s", err)
@@ -136,7 +157,7 @@ func DrawHeader(dc win32.HDC, pageWidth, startY uint32, pdv Pdv) uint32 {
 	if err != nil {
 		log.Printf("Get text dimensions failed: %s", err)
 	}
-	x = CenterElement(pageWidth, textWidth)
+	x = layout.CenterElement(pageWidth, textWidth)
 	err = win32.TextOut(dc, x, startY, timestamp, uint32(len(timestamp)))
 	if err != nil {
 		log.Printf("TextOut failed: %s", err)
@@ -164,7 +185,7 @@ func DrawFooter(dc win32.HDC, pageWidth, margin, startY uint32, totalArticles in
 	if err != nil {
 		log.Printf("SetTextSize failed: %s", err)
 	}
-	x := CenterElement(pageWidth/2, textWidth)
+	x := layout.CenterElement(pageWidth/2, textWidth)
 	err = win32.TextOut(dc, x, startY, totalLine[0], uint32(len(totalLine[0])))
 	if err != nil {
 		log.Printf("TextOut failed: %s", err)
@@ -174,7 +195,7 @@ func DrawFooter(dc win32.HDC, pageWidth, margin, startY uint32, totalArticles in
 	if err != nil {
 		log.Printf("Get text dimensions failed: %s", err)
 	}
-	x = AlignRight(pageWidth-margin, textWidth)
+	x = layout.AlignRight(pageWidth-margin, textWidth)
 
 	err = win32.TextOut(dc, x, startY, totalLine[1], uint32(len(totalLine[1])))
 	if err != nil {
@@ -193,7 +214,7 @@ func DrawFooter(dc win32.HDC, pageWidth, margin, startY uint32, totalArticles in
 	if err != nil {
 		log.Printf("Get text dimensions failed: %s", err)
 	}
-	x = CenterElement(pageWidth, textWidth)
+	x = layout.CenterElement(pageWidth, textWidth)
 	err = win32.TextOut(dc, x, startY, text, uint32(len(text)))
 	if err != nil {
 		log.Printf("TextOut failed: %s", err)
@@ -207,9 +228,64 @@ func DrawFooter(dc win32.HDC, pageWidth, margin, startY uint32, totalArticles in
 	if err != nil {
 		log.Printf("Get text dimensions failed: %s", err)
 	}
-	x = CenterElement(pageWidth, textWidth)
+	x = layout.CenterElement(pageWidth, textWidth)
 	err = win32.TextOut(dc, x, startY, text, uint32(len(text)))
 	if err != nil {
 		log.Printf("TextOut failed: %s", err)
+	}
+}
+
+func PrintA4(printName string, margin uint32, textHeight int32, pdv Pdv, ticket Ticket) {
+	dc, err := win32.CreateDC(printName)
+	if err != nil {
+		log.Fatalf("CreateDC failed: %s", err)
+	}
+	err = win32.StartDCPrinter(dc, "gdiDoc")
+	if err != nil {
+		log.Fatalf("StartDCPrinter failed: %s", err)
+	}
+	err = win32.StartPage(dc)
+	if err != nil {
+		log.Fatalf("StartPage failed: %s", err)
+	}
+
+	win32.SetFont(dc, win32.CourierNew)
+	width, err := win32.GetDeviceCaps(dc, win32.HORZRES)
+	if err != nil {
+		log.Fatalf("Retreiving page width failed: %s", err)
+	}
+	_, err = win32.GetDeviceCaps(dc, win32.VERTRES)
+	if err != nil {
+		log.Fatalf("Retreiving page height failed: %s", err)
+	}
+
+	oldcol, err := win32.SetTextColor(dc, win32.RGB(0, 0, 0))
+	if err != nil {
+		log.Printf("SetTextColor failed: %s", err)
+	}
+	log.Printf("Before color was %v", oldcol)
+
+	_, err = win32.SetTextSize(dc, textHeight)
+	if err != nil {
+		log.Printf("SetTextSize failed: %s", err)
+	}
+
+	headerStopsY := DrawHeader(dc, width, margin, pdv)
+
+	tabStopsY, totalArticles, aPayer := DrawArticlesTab(dc, width, margin, headerStopsY, ticket)
+
+	DrawFooter(dc, width, margin, tabStopsY, totalArticles, aPayer)
+
+	err = win32.EndPage(dc)
+	if err != nil {
+		log.Printf("EndPage failed: %s", err)
+	}
+	err = win32.EndDoc(dc)
+	if err != nil {
+		log.Printf("EndDoc failed: %s", err)
+	}
+	err = win32.DeleteDC(dc)
+	if err != nil {
+		log.Printf("DeleteDC failed: %s", err)
 	}
 }
