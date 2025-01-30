@@ -9,8 +9,8 @@ package main
 import (
 	"log"
 
-	"print/ticket"
-	"print/win32"
+	"github.com/clementuu/golang-win32-printer/ticket"
+	"github.com/clementuu/golang-win32-printer/win32"
 )
 
 var t = ticket.Ticket{

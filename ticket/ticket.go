@@ -3,8 +3,8 @@ package ticket
 import (
 	"fmt"
 	"log"
-	"print/layout"
-	"print/win32"
+	"github.com/clementuu/golang-win32-printer/layout"
+	"github.com/clementuu/golang-win32-printer/win32"
 	"syscall"
 	"time"
 )

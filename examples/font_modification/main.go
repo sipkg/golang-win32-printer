@@ -2,9 +2,10 @@ package main
 
 import (
 	"log"
-	"print/layout"
-	"print/win32"
 	"syscall"
+
+	"github.com/clementuu/golang-win32-printer/layout"
+	"github.com/clementuu/golang-win32-printer/win32"
 )
 
 const (

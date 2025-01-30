@@ -3,7 +3,8 @@ package bgr
 import (
 	"image"
 	"image/color"
-	color2 "print/image/color"
+
+	color2 "github.com/clementuu/golang-win32-printer/image/color"
 )
 
 type BGRImage struct {
