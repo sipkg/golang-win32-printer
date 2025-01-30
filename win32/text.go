@@ -3,6 +3,7 @@
 package win32
 
 import (
+	"fmt"
 	"log"
 	"syscall"
 	"unsafe"
@@ -80,7 +81,7 @@ func SetTextSize(hdc HDC, size int32) (int32, error) {
 	var lf LOGFONT
 	font, _, err := syscall.SyscallN(procGetCurrentObject.Addr(), uintptr(hdc), uintptr(OBJ_FONT))
 	if font == 0 {
-		return 0, err
+		return 0, fmt.Errorf("syscall getcurrobject : %v", err)
 	}
 
 	// Get font information
@@ -89,9 +90,10 @@ func SetTextSize(hdc HDC, size int32) (int32, error) {
 		uintptr(unsafe.Sizeof(lf)),
 		uintptr(unsafe.Pointer(&lf)),
 	)
-	if ret == 0 {
-		return 0, err
-	}
+	fmt.Println(ret)
+	// if ret == 0 {
+	// 	return 0, fmt.Errorf("syscall getobject : %v", err)
+	// }
 
 	originalHeight := lf.Height
 
@@ -103,7 +105,7 @@ func SetTextSize(hdc HDC, size int32) (int32, error) {
 	// Create new font
 	newFont, _, err := syscall.SyscallN(procCreateFontIndirect.Addr(), uintptr(unsafe.Pointer(&lf)))
 	if newFont == 0 {
-		return 0, err
+		return 0, fmt.Errorf("syscall createfont : %v", err)
 	}
 
 	// Select new font into DC
@@ -113,7 +115,7 @@ func SetTextSize(hdc HDC, size int32) (int32, error) {
 	)
 	if oldFont == 0 {
 		syscall.SyscallN(procDeleteObject.Addr(), newFont)
-		return 0, err
+		return 0, fmt.Errorf("syscall deleteobject : %v", err)
 	}
 
 	// Delete old font if it exists
@@ -138,9 +140,10 @@ func SetBoldFont(hdc HDC, bold bool) error {
 		uintptr(unsafe.Sizeof(lf)),
 		uintptr(unsafe.Pointer(&lf)),
 	)
-	if ret == 0 {
-		return err
-	}
+	fmt.Println(ret)
+	// if ret == 0 {
+	// 	return err
+	// }
 
 	// Update weight to bold
 	if bold {
