@@ -2,14 +2,15 @@ package win32
 
 import (
 	"fmt"
-	"golang.org/x/image/bmp"
 	image2 "image"
 	"image/draw"
 	"image/jpeg"
 	"image/png"
 	"os"
-	bgr2 "print/image/bgr"
 	"testing"
+
+	bgr2 "github.com/clementuu/golang-win32-printer/image/bgr"
+	"golang.org/x/image/bmp"
 )
 
 func TestCreateDC(t *testing.T) {

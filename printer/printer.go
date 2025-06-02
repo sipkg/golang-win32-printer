@@ -2,9 +2,10 @@ package printer
 
 import (
 	"errors"
-	"golang.org/x/sys/windows"
-	"print/win32"
 	"unsafe"
+
+	"github.com/clementuu/golang-win32-printer/win32"
+	"golang.org/x/sys/windows"
 )
 
 const (

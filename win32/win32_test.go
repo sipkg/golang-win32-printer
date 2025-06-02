@@ -2,12 +2,13 @@ package win32
 
 import (
 	"fmt"
-	"golang.org/x/sys/windows"
 	"image"
 	_ "image/jpeg"
 	_ "image/png"
 	"testing"
 	"unsafe"
+
+	"golang.org/x/sys/windows"
 )
 
 func TestOpenPrinter(t *testing.T) {
@@ -130,12 +131,6 @@ func imageToRGBA(img image.Image) *[]uint8 {
 		}
 	}
 	return &raw
-}
-
-type PrinterInfo struct {
-	PrinterName string
-	ServerName  string
-	Attributes  uint32
 }
 
 func TestEnumPrinter(t *testing.T) {

@@ -3,6 +3,8 @@
 package win32
 
 import (
+	"fmt"
+	"log"
 	"syscall"
 	"unsafe"
 
@@ -12,6 +14,13 @@ import (
 // Constants
 const (
 	HFONT = 6 // Object type for getCurrentFont
+)
+
+const (
+	Arial         = "Arial"
+	TimesNewRoman = "Times New Roman"
+	CourierNew    = "Courier New"
+	Verdana       = "Verdana"
 )
 
 // LOGFONT contains information about a logical font
@@ -67,39 +76,239 @@ func SetTextColor(hdc HDC, color COLORREF) (COLORREF, error) {
 //
 // Returns:
 //   - error: nil if successful, error object otherwise
-func SetTextSize(hdc HDC, size int32) error {
+func SetTextSize(hdc HDC, size int32) (i int32, err error) {
 	// Get current font
 	var lf LOGFONT
-	font, _, err := syscall.SyscallN(procGetCurrentObject.Addr(), uintptr(hdc), uintptr(OBJ_FONT))
-	if font == 0 {
-		return err
+	font, _, errno := syscall.SyscallN(procGetCurrentObject.Addr(), uintptr(hdc), uintptr(OBJ_FONT))
+	if errno != 0 {
+		err = errno
+	}
+	if err != nil {
+		return 0, fmt.Errorf("syscall getcurrobject : %v", err)
 	}
 
 	// Get font information
-	ret, _, err := syscall.SyscallN(procGetObject.Addr(),
+	_, _, errno = syscall.SyscallN(procGetObject.Addr(),
 		font,
 		uintptr(unsafe.Sizeof(lf)),
 		uintptr(unsafe.Pointer(&lf)),
 	)
-	if ret == 0 {
-		return err
+	if errno != 0 {
+		err = errno
 	}
+	if err != nil {
+		return 0, fmt.Errorf("syscall getobject : %v", err)
+	}
+
+	originalHeight := lf.Height
 
 	// Update height (negative value for character height)
 	lf.Height = -size
+	// Update width proportionally (adjust the factor if needed)
+	lf.Width = size / 2
 
 	// Create new font
-	newFont, _, err := syscall.SyscallN(procCreateFontIndirect.Addr(), uintptr(unsafe.Pointer(&lf)))
-	if newFont == 0 {
+	newFont, _, errno := syscall.SyscallN(procCreateFontIndirect.Addr(), uintptr(unsafe.Pointer(&lf)))
+	if errno != 0 {
+		err = errno
+	}
+	if err != nil {
+		return 0, fmt.Errorf("syscall createfont : %v", err)
+	}
+
+	// Select new font into DC
+	oldFont, _, errno := syscall.SyscallN(procSelectObject.Addr(),
+		uintptr(hdc),
+		newFont,
+	)
+	if errno != 0 {
+		err = errno
+	}
+	if err != nil || oldFont == 0 {
+		syscall.SyscallN(procDeleteObject.Addr(), newFont)
+		return 0, fmt.Errorf("syscall deleteobject : %v", err)
+	}
+
+	// Delete old font if it exists
+	if font != 0 {
+		syscall.SyscallN(procDeleteObject.Addr(), font)
+	}
+
+	return -originalHeight, nil
+}
+
+func SetBoldFont(hdc HDC, bold bool) (err error) {
+	// Get current font
+	var lf LOGFONT
+	font, _, errno := syscall.SyscallN(procGetCurrentObject.Addr(), uintptr(hdc), uintptr(OBJ_FONT))
+	if errno != 0 {
+		err = errno
+	}
+	if err != nil {
+		return err
+	}
+
+	// Get font information
+	_, _, errno = syscall.SyscallN(procGetObject.Addr(),
+		font,
+		uintptr(unsafe.Sizeof(lf)),
+		uintptr(unsafe.Pointer(&lf)),
+	)
+	if errno != 0 {
+		err = errno
+	}
+	if err != nil {
+		return err
+	}
+
+	// Update weight to bold
+	if bold {
+		lf.Weight = 700 // FW_BOLD
+	} else {
+		lf.Weight = 400 //FW_NORMAL
+	}
+
+	// Create new font
+	newFont, _, errno := syscall.SyscallN(procCreateFontIndirect.Addr(), uintptr(unsafe.Pointer(&lf)))
+	if errno != 0 {
+		err = errno
+	}
+	if err != nil {
 		return err
 	}
 
 	// Select new font into DC
-	oldFont, _, err := syscall.SyscallN(procSelectObject.Addr(),
+	oldFont, _, errno := syscall.SyscallN(procSelectObject.Addr(),
 		uintptr(hdc),
 		newFont,
 	)
-	if oldFont == 0 {
+	if errno != 0 {
+		err = errno
+	}
+	if err != nil || oldFont == 0 {
+		syscall.SyscallN(procDeleteObject.Addr(), newFont)
+		return err
+	}
+
+	// Delete old font if it exists
+	if font != 0 {
+		syscall.SyscallN(procDeleteObject.Addr(), font)
+	}
+
+	return nil
+}
+
+func SetItalicFont(hdc HDC, italic bool) (err error) {
+	// Get current font
+	var lf LOGFONT
+	font, _, errno := syscall.SyscallN(procGetCurrentObject.Addr(), uintptr(hdc), uintptr(OBJ_FONT))
+	if errno != 0 {
+		err = errno
+	}
+	if err != nil {
+		return err
+	}
+
+	// Get font information
+	_, _, errno = syscall.SyscallN(procGetObject.Addr(),
+		font,
+		uintptr(unsafe.Sizeof(lf)),
+		uintptr(unsafe.Pointer(&lf)),
+	)
+	if errno != 0 {
+		err = errno
+	}
+	if err != nil {
+		return err
+	}
+
+	// Update italic property
+	if italic {
+		lf.Italic = 1
+	} else {
+		lf.Italic = 0
+	}
+
+	// Create new font
+	newFont, _, errno := syscall.SyscallN(procCreateFontIndirect.Addr(), uintptr(unsafe.Pointer(&lf)))
+	if errno != 0 {
+		err = errno
+	}
+	if err != nil {
+		return err
+	}
+
+	// Select new font into DC
+	oldFont, _, errno := syscall.SyscallN(procSelectObject.Addr(),
+		uintptr(hdc),
+		newFont,
+	)
+	if errno != 0 {
+		err = errno
+	}
+	if err != nil || oldFont == 0 {
+		syscall.SyscallN(procDeleteObject.Addr(), newFont)
+		return err
+	}
+
+	// Delete old font if it exists
+	if font != 0 {
+		syscall.SyscallN(procDeleteObject.Addr(), font)
+	}
+
+	return nil
+}
+
+func SetFont(hdc HDC, fontName string) (err error) {
+	// Get current font
+	var lf LOGFONT
+	font, _, errno := syscall.SyscallN(procGetCurrentObject.Addr(), uintptr(hdc), uintptr(OBJ_FONT))
+	if errno != 0 {
+		err = errno
+	}
+	if err != nil {
+		return err
+	}
+
+	// Get font information
+	_, _, errno = syscall.SyscallN(procGetObject.Addr(),
+		font,
+		uintptr(unsafe.Sizeof(lf)),
+		uintptr(unsafe.Pointer(&lf)),
+	)
+	if errno != 0 {
+		err = errno
+	}
+	if err != nil {
+		return err
+	}
+
+	// Update font properties
+	f, er := syscall.UTF16FromString(fontName)
+	if er != nil {
+		// Gérer l'erreur ici
+		log.Fatalf("Erreur lors de la conversion de la chaîne en UTF-16 : %v", err)
+	}
+	copy(lf.FaceName[:], f)
+
+	// Create new font
+	newFont, _, errno := syscall.SyscallN(procCreateFontIndirect.Addr(), uintptr(unsafe.Pointer(&lf)))
+	if errno != 0 {
+		err = errno
+	}
+	if err != nil {
+		return err
+	}
+
+	// Select new font into DC
+	oldFont, _, errno := syscall.SyscallN(procSelectObject.Addr(),
+		uintptr(hdc),
+		newFont,
+	)
+	if errno != 0 {
+		err = errno
+	}
+	if err != nil || oldFont == 0 {
 		syscall.SyscallN(procDeleteObject.Addr(), newFont)
 		return err
 	}

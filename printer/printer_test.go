@@ -6,9 +6,10 @@ import (
 	"image/draw"
 	"image/jpeg"
 	"os"
-	bgr2 "print/image/bgr"
-	"print/win32"
 	"testing"
+
+	bgr2 "github.com/clementuu/golang-win32-printer/image/bgr"
+	"github.com/clementuu/golang-win32-printer/win32"
 )
 
 type imagePrinter struct {
