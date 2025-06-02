@@ -9,7 +9,7 @@ import (
 	"os"
 	"testing"
 
-	bgr2 "github.com/clementuu/golang-win32-printer/image/bgr"
+	bgr2 "github.com/sipkg/golang-win32-printer/image/bgr"
 	"golang.org/x/image/bmp"
 )
 
@@ -42,16 +42,17 @@ func TestResetDC(t *testing.T) {
 }
 
 func TestImageEncode(t *testing.T) {
-
 	printName := "Microsoft Print to PDF"
 	dc, err := CreateDC(printName)
 	fmt.Print(err)
 	StartDCPrinter(dc, "gdiDoc")
 	StartPage(dc)
 
-	pix := []byte{255, 255, 255, 150, 146, 246, 36, 28, 237, 0, 0, 0,
+	pix := []byte{
+		255, 255, 255, 150, 146, 246, 36, 28, 237, 0, 0, 0,
 		36, 36, 36, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-		73, 73, 73, 24, 24, 24, 133, 133, 133, 0, 0, 0}
+		73, 73, 73, 24, 24, 24, 133, 133, 133, 0, 0, 0,
+	}
 	fmt.Print(err)
 	err = DrawDIImage(dc, 600, 600, 720, 360, 0, 0, 3, 3, pix)
 	fmt.Print(err)

@@ -4,7 +4,7 @@ import (
 	"errors"
 	"unsafe"
 
-	"github.com/clementuu/golang-win32-printer/win32"
+	"github.com/sipkg/golang-win32-printer/win32"
 	"golang.org/x/sys/windows"
 )
 
@@ -44,9 +44,11 @@ func (p *Printer) EnumPrinter() (info []win32.PrinterInfo, err error) {
 	ps := (*[1024]win32.PRINT_INFO_4)(unsafe.Pointer(&buf[0]))[:returned:returned]
 	printInfos := make([]win32.PrinterInfo, 0, returned)
 	for _, p := range ps {
-		printInfos = append(printInfos, win32.PrinterInfo{PrinterName: windows.UTF16PtrToString(p.PrinterName),
-			ServerName: windows.UTF16PtrToString(p.ServerName),
-			Attributes: p.Attributes})
+		printInfos = append(printInfos, win32.PrinterInfo{
+			PrinterName: windows.UTF16PtrToString(p.PrinterName),
+			ServerName:  windows.UTF16PtrToString(p.ServerName),
+			Attributes:  p.Attributes,
+		})
 	}
 	return printInfos, nil
 }

@@ -8,12 +8,11 @@ import (
 	"os"
 	"testing"
 
-	bgr2 "github.com/clementuu/golang-win32-printer/image/bgr"
-	"github.com/clementuu/golang-win32-printer/win32"
+	bgr2 "github.com/sipkg/golang-win32-printer/image/bgr"
+	"github.com/sipkg/golang-win32-printer/win32"
 )
 
-type imagePrinter struct {
-}
+type imagePrinter struct{}
 
 func (ip *imagePrinter) Print(p *Printer) {
 	file, err := os.Open("C:\\Users\\wangjun\\Desktop\\pdf\\sekiro.png")

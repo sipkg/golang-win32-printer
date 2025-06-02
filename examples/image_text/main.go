@@ -14,9 +14,9 @@ import (
 	"os"
 	"syscall"
 
-	"github.com/clementuu/golang-win32-printer/image/bgr"
-	"github.com/clementuu/golang-win32-printer/layout"
-	"github.com/clementuu/golang-win32-printer/win32"
+	"github.com/sipkg/golang-win32-printer/image/bgr"
+	"github.com/sipkg/golang-win32-printer/layout"
+	"github.com/sipkg/golang-win32-printer/win32"
 )
 
 const (

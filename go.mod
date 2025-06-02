@@ -1,4 +1,4 @@
-module github.com/clementuu/golang-win32-printer
+module github.com/sipkg/golang-win32-printer
 
 go 1.22
 

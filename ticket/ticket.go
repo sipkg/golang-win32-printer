@@ -3,10 +3,11 @@ package ticket
 import (
 	"fmt"
 	"log"
-	"github.com/clementuu/golang-win32-printer/layout"
-	"github.com/clementuu/golang-win32-printer/win32"
 	"syscall"
 	"time"
+
+	"github.com/sipkg/golang-win32-printer/layout"
+	"github.com/sipkg/golang-win32-printer/win32"
 )
 
 type Article struct {
@@ -31,7 +32,7 @@ type Pdv struct {
 
 func formatArticles(ticket Ticket) ([][]string, int) {
 	var formattedArticles [][]string
-	var totalArticles = 0
+	totalArticles := 0
 	for _, article := range ticket.Articles {
 		totalArticles += article.Quantite
 		formattedArticle := []string{
@@ -153,7 +154,6 @@ func DrawHeader(dc win32.HDC, pageWidth, startY uint32, pdv Pdv) uint32 {
 
 	timestamp := time.Now().Format("02/01/2006 15:04:05")
 	textWidth, textHeight, err = win32.GetTextExtentPoint32(syscall.Handle(dc), timestamp)
-
 	if err != nil {
 		log.Printf("Get text dimensions failed: %s", err)
 	}
