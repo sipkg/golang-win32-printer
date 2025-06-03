@@ -47,18 +47,8 @@ func formatArticles(ticket Ticket) ([][]string, int) {
 
 func DrawSeparator(dc win32.HDC, pageWidth, startY uint32) uint32 {
 	// Dessiner la ligne de séparation
-	separator := "--------------------------------------------------------"
-	textWidth, textHeight, err := win32.GetTextExtentPoint32(syscall.Handle(dc), separator)
-	if err != nil {
-		log.Printf("Get text dimensions failed: %s", err)
-	}
-	x := layout.CenterElement(pageWidth, textWidth)
-	err = win32.TextOut(dc, x, startY, separator, uint32(len(separator)))
-	if err != nil {
-		log.Printf("TextOut failed: %s", err)
-	}
-
-	startY += textHeight
+	_, _ = win32.MoveTo(dc, 0, startY)
+	win32.LineTo(dc, pageWidth, startY)
 
 	return startY + 100
 }

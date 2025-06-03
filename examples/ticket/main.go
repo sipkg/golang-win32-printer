@@ -36,13 +36,13 @@ var pdv = ticket.Pdv{
 }
 
 const (
-	textHeight = 128
+	textHeight = 64
 	margin     = 350
 )
 
 func main() {
-	printName := "Microsoft Print to PDF"
-	// printName := "PDF"
+	// printName := "Microsoft Print to PDF"
+	printName := "PDF"
 	dc, err := win32.CreateDC(printName)
 	if err != nil {
 		log.Fatalf("CreateDC failed: %s", err)
